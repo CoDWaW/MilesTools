@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Mileslice": {
+      "commandName": "Project",
+      "commandLineArgs": "--help"
+    }
+  }
+}
