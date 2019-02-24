@@ -104,7 +104,7 @@ namespace Binkalore
 
         private static void PrintUsage()
         {
-            PrintDebug("Usage: dotnet BinkAudioTool.dll [inputPath] (outputPath) (options)");
+            PrintDebug("Usage: Binkalore.exe [inputPath] (outputPath) (options)");
             PrintDebug("Options:");
             PrintDebug("\t--help\tPrint command line help information");
             PrintDebug("\t--silent\tOnly print minimal debug information");
