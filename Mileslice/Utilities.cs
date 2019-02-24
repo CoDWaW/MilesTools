@@ -10,7 +10,7 @@ namespace Mileslice
         internal static void PrintUsage()
         {
             Console.WriteLine("Mileslice - Miles Sound System 10 Bank File Slicer");
-            Console.WriteLine("Usage: dotnet Mileslice.dll [inputPath] (outputPath) (options)");
+            Console.WriteLine("Usage: Mileslice.exe [inputPath] (outputPath) (options)");
             Console.WriteLine("Input path can either be a single file or a directory.");
             Console.WriteLine("Options:");
             Console.WriteLine("- Logging");
