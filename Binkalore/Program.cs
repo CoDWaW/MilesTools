@@ -22,10 +22,10 @@ namespace Binkalore
         internal static string OutputPath = "";
         internal static bool IsHelp = false;
         internal static bool IsSilent = false;
+        internal static bool IsVerbose = false;
 
         private static void Main(string[] args)
         {
-            PrintDebug("Binkalore - Bink Audio format converter");
             CheckDependencies();
 
             if (args.Length == 0)
@@ -70,7 +70,7 @@ namespace Binkalore
                 PrintError($"Failed to create output directory \"{OutputPath}\": {e.Message}");
             }
 
-            PrintDebug("Initializing MSS...");
+            PrintInfo("Initializing MSS...");
             Initialize();
             ConvertFiles(args[0]);
         }
@@ -85,6 +85,7 @@ namespace Binkalore
         {
             // var files = Directory.GetFiles(inputPath);
             // PrintDebug($"Found {files.Length} files in target directory. Beginning conversion.");
+            PrintInfo($"Processing {inputPath}...");
             var result = AilDecompressAsi(File.ReadAllBytes(inputPath), out byte[] wavData);
             if (String.IsNullOrEmpty(result))
             {
@@ -95,20 +96,11 @@ namespace Binkalore
             }
             else
             {
-                PrintDebug($"Conversion error on file {Path.GetFileName(inputPath)}: {result}");
+                PrintInfo($"Conversion error on file {Path.GetFileName(inputPath)}: {result}");
             }
 
             AilShutdown();
             PrintError("Conversion completed.");
-        }
-
-        private static void PrintUsage()
-        {
-            PrintDebug("Usage: Binkalore.exe [inputPath] (outputPath) (options)");
-            PrintDebug("Options:");
-            PrintDebug("\t--help\tPrint command line help information");
-            PrintDebug("\t--silent\tOnly print minimal debug information");
-            PrintError("(End of help)");
         }
 
         private static void CheckDependencies()
@@ -119,7 +111,7 @@ namespace Binkalore
             }
             if (!File.Exists("binkawin.asi"))
             {
-                PrintDebug("binkawin.asi (Bink Audio ASI Codec) is not found.");
+                PrintError("binkawin.asi (Bink Audio ASI Codec) is not found.");
             }
         }
 
@@ -135,6 +127,11 @@ namespace Binkalore
                         break;
                     case "--silent":
                         IsSilent = true;
+                        PrintInfo("Silent: most logging is disabled.");
+                        break;
+                    case "--verbose":
+                        IsVerbose = true;
+                        PrintInfo("Verbose: detailed logging is enabled.");
                         break;
                     default:
                         // Invalid switch, ignore
