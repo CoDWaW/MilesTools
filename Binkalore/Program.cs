@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 
+using static Binkalore.Conversion;
 using static Binkalore.InteropWrapper;
 using static Binkalore.Utilities;
 
@@ -23,84 +24,92 @@ namespace Binkalore
         internal static bool IsHelp = false;
         internal static bool IsSilent = false;
         internal static bool IsVerbose = false;
+        internal static bool IsRecursive = false;
 
         private static void Main(string[] args)
         {
-            CheckDependencies();
-
+            // Check arguments
             if (args.Length == 0)
             {
                 PrintUsage();
             }
 
-            // Expect a valid file path as the first argument
+            ParseSwitches(args);
+
+            // Check paths
+            var outputPath = "";
+            var isDirectory = false;
             if (File.Exists(args[0]))
             {
-                // Set default output path name
-                OutputPath = Path.GetFileNameWithoutExtension(args[0]);
+                // A single file is specified
+                outputPath = Path.GetFileNameWithoutExtension(args[0]);
+            }
+            else if (Directory.Exists(args[0]))
+            {
+                // A directory is specified
+                isDirectory = true;
             }
             else
             {
-                PrintError($"Specified input file \"{args[0]}\" does not exist.");
+                // Path is invalid
+                PrintError($"Specified input path \"{args[0]}\" is neither a file nor a directory.");
             }
 
             // Check if an output path is specified as the second argument
             if (args.Length > 1 && !args[1].StartsWith("--"))
             {
                 // The second argument is not a switch
-                try
-                {
-                    Directory.CreateDirectory(args[1]);
-                    OutputPath = args[1];
-                    PrintDebug($"Using output path \"{OutputPath}\".");
-                }
-                catch (Exception e)
-                {
-                    PrintError($"Failed to create output directory \"{args[1]}\": {e.Message}");
-                }
+                outputPath = args[1];
             }
 
             // Ensure creation of output directory
             try
             {
-                Directory.CreateDirectory(OutputPath);
+                Directory.CreateDirectory(outputPath);
             }
             catch (Exception e)
             {
-                PrintError($"Failed to create output directory \"{OutputPath}\": {e.Message}");
+                PrintError($"Failed to create output directory \"{outputPath}\": {e.Message}");
             }
 
+            PrintDebug($"Using input path \"{args[0]}\".");
+            PrintDebug($"Using output path \"{outputPath}\".");
+
+            // Initialize MSS
+            CheckDependencies();
             PrintInfo("Initializing MSS...");
             Initialize();
-            ConvertFiles(args[0]);
+
+            if (isDirectory)
+            {
+                // Slicing all files in a directory
+                string[] files;
+                if (IsRecursive)
+                {
+                    // Recursive listing
+                    files = Directory.GetFiles(args[0], "*", SearchOption.AllDirectories);
+                }
+                else
+                {
+                    // Only top directory
+                    files = Directory.GetFiles(args[0], "*", SearchOption.TopDirectoryOnly);
+                }
+                ConvertFiles(files, outputPath);
+            }
+            else
+            {
+                // Slicing a single file
+                ConvertFile(args[0], outputPath);
+            }
+
+            AilShutdown();
+            PrintError("Conversion completed.");
         }
 
         private static void Initialize()
         {
             AilSetRedistDirectory(".");
             AilStartup();
-        }
-
-        private static void ConvertFiles(string inputPath)
-        {
-            // var files = Directory.GetFiles(inputPath);
-            // PrintDebug($"Found {files.Length} files in target directory. Beginning conversion.");
-            PrintInfo($"Processing {inputPath}...");
-            var result = AilDecompressAsi(File.ReadAllBytes(inputPath), out byte[] wavData);
-            if (String.IsNullOrEmpty(result))
-            {
-                // No error occured
-                var outputFilePath = Path.Combine(
-                    OutputPath, $"{Path.GetFileNameWithoutExtension(inputPath)}.wav");
-                File.WriteAllBytes(outputFilePath, wavData);
-            }
-            else
-            {
-                PrintInfo($"Conversion error on file {Path.GetFileName(inputPath)}: {result}");
-            }
-
-            AilShutdown();
-            PrintError("Conversion completed.");
         }
 
         private static void CheckDependencies()
@@ -132,6 +141,10 @@ namespace Binkalore
                     case "--verbose":
                         IsVerbose = true;
                         PrintInfo("Verbose: detailed logging is enabled.");
+                        break;
+                    case "--recursive":
+                        IsRecursive = true;
+                        PrintInfo("Recursive: all files under input directory will be processed.");
                         break;
                     default:
                         // Invalid switch, ignore

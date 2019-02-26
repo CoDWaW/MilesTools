@@ -15,11 +15,11 @@ namespace Mileslice
         /// <summary>
         /// Slice a list of files.
         /// </summary>
-        /// <param name="inputFile">The list of path to files to be sliced.</param>
+        /// <param name="inputFiles">The list of path to files to be sliced.</param>
         /// <param name="outputPath">The output path to save all slices.</param>
-        internal static void SliceFile(string[] inputFile, string outputPath)
+        internal static void SliceFiles(string[] inputFiles, string outputPath)
         {
-            foreach (var file in inputFile)
+            foreach (var file in inputFiles)
             {
                 var extractPath = Path.Combine(outputPath, Path.GetFileNameWithoutExtension(file));
                 // Create separate path for each file

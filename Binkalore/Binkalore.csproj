@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Chunk.cs" />
+    <Compile Include="Conversion.cs" />
     <Compile Include="Interop.cs" />
     <Compile Include="InteropWrapper.cs" />
     <Compile Include="Program.cs" />

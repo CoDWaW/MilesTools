@@ -28,6 +28,7 @@ namespace Mileslice
             {
                 PrintUsage();
             }
+
             ParseSwitches(args);
 
             // Check paths
@@ -83,7 +84,7 @@ namespace Mileslice
                     // Only top directory
                     files = Directory.GetFiles(args[0], "*", SearchOption.TopDirectoryOnly);
                 }
-                SliceFile(files, outputPath);
+                SliceFiles(files, outputPath);
             }
             else
             {
