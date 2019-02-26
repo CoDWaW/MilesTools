@@ -9,6 +9,7 @@ namespace Binkalore
     internal static class InteropWrapper
     {
         private const string BinkAudioExtension = ".binka";
+        private const int WavHeaderLength = 44;
 
         internal static AilLengthyCallback _callback = Callback;
 
@@ -71,13 +72,18 @@ namespace Binkalore
                 ref wavSize,
                 _callback);
 
-            if (result == 1)
+            if (result == 1 && wavSize > WavHeaderLength)
             {
                 PrintDebug("ASI decompression successful.");
                 wavData = new byte[wavSize];
                 Marshal.Copy(wavPointer, wavData, 0, (int)wavSize);
                 AilMemFreeLock(wavPointer);
                 return String.Empty;
+            }
+            else if (result == 1 && wavSize <= WavHeaderLength)
+            {
+                PrintDebug("ASI decompression produced an empty wav file.");
+                return "The converted WAV file contains no sound data.";
             }
             else
             {
